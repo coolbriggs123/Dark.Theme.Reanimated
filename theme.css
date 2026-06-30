@@ -45,20 +45,52 @@ body,
 }
 
 /* =============================================================================
-   GLOBAL TRANSITIONS — smooth everything, GPU-safe properties only
+   TARGETED TRANSITIONS — only on elements that actually animate.
+   A global * transition is the #1 Discord theme performance killer.
    ============================================================================= */
 @media (prefers-reduced-motion: no-preference) {
-  *,
-  *::before,
-  *::after {
+  /* Interactive surfaces */
+  [class*="containerDefault-"],
+  [class*="channel-"] [class*="container-"],
+  [class*="member-"] [class*="container-"],
+  [class*="item-"][class*="themed-"],
+  [class*="settingsMenuItem-"],
+  [class*="reaction-"],
+  [class*="winButton-"] {
     transition:
       background-color var(--transition-fast),
       color            var(--transition-fast),
       border-color     var(--transition-fast),
-      opacity          var(--transition-fast),
-      box-shadow       var(--transition-medium),
-      filter           var(--transition-medium),
-      transform        var(--transition-medium);
+      box-shadow       var(--transition-medium);
+  }
+
+  /* Elements that transform */
+  [class*="listItem-"] [class*="wrapper-"],
+  [class*="blobContainer-"],
+  [class*="reaction-"] {
+    transition: transform var(--transition-bounce), box-shadow var(--transition-bounce);
+  }
+
+  /* Inputs and borders */
+  input,
+  textarea,
+  [class*="input-"],
+  [class*="inputDefault-"],
+  [class*="searchBar-"],
+  [class*="channelTextArea-"],
+  [class*="textArea-"] {
+    transition:
+      border-color var(--transition-fast),
+      box-shadow   var(--transition-fast);
+  }
+
+  /* Buttons */
+  [class*="button-"],
+  button[class*="filled-"],
+  button[class*="outlined-"] {
+    transition:
+      filter       var(--transition-fast),
+      border-color var(--transition-fast);
   }
 }
 
@@ -159,12 +191,7 @@ nav[class*="guilds-"],
   border-right: 1px solid var(--border);
 }
 
-/* Server icon hover — spring bounce */
-[class*="listItem-"] [class*="wrapper-"],
-[class*="blobContainer-"] {
-  transition: transform var(--transition-bounce), box-shadow var(--transition-bounce) !important;
-}
-
+/* Server icon hover — spring bounce (transition defined in TARGETED TRANSITIONS) */
 @media (prefers-reduced-motion: no-preference) {
   [class*="listItem-"]:hover [class*="wrapper-"],
   [class*="listItem-"]:hover [class*="blobContainer-"] {
@@ -300,11 +327,7 @@ pre,
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset !important;
 }
 
-/* Toolbar inside input */
-[class*="toolbar-"],
-[class*="buttons-"] {
-  background: transparent !important;
-}
+/* (Toolbar button styles live in the BUTTONS section below) */
 
 /* =============================================================================
    INPUTS & FORMS (generic)
@@ -542,52 +565,65 @@ rect[class*="pointerEvents-"] {
 }
 
 /* =============================================================================
-   PANELS — glassmorphism surfaces
+   PANELS — blur only on floating surfaces to avoid GPU overload.
+   Applying backdrop-filter to multiple large static panels simultaneously
+   is a major compositing cost. Sidebars use solid backgrounds instead.
    ============================================================================= */
 [class*="sidebar-"],
 [class*="chatContent-"],
 [class*="membersWrap-"],
 [class*="standardSidebarView-"] {
-  -webkit-backdrop-filter: blur(var(--blur));
-  backdrop-filter: blur(var(--blur));
   box-shadow: var(--shadow);
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-  [class*="sidebar-"],
-  [class*="chatContent-"],
-  [class*="membersWrap-"],
-  [class*="standardSidebarView-"] {
-    background: var(--bg-secondary) !important;
-  }
+  /* No backdrop-filter here — too costly on large panels */
 }
 
 /* =============================================================================
    BUTTONS
+   Scoped to <button> elements only to avoid hitting icon wrapper divs
+   that share "button" in their class name. Do NOT add overflow:hidden
+   or border-radius to generic [class*="button-"] — it clips SVG icons.
    ============================================================================= */
-[class*="button-"],
+button[class*="button-"],
 button[class*="filled-"],
 button[class*="outlined-"] {
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius-small) !important;
   color: var(--text-primary) !important;
+  overflow: visible !important; /* ensure icons are never clipped */
 }
 
-[class*="button-"]:hover,
+button[class*="button-"]:hover,
 button[class*="filled-"]:hover {
   filter: brightness(1.08) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-[class*="button-"]:active {
+button[class*="button-"]:active {
   filter: brightness(0.94) !important;
-  transform: scale(0.98);
+  /* no transform scale — avoids layout jitter on icon buttons */
+}
+
+/* Icon-only toolbar buttons — transparent bg, no border */
+[class*="iconWrapper-"] button,
+[class*="toolbar-"] button,
+[class*="buttons-"] button {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-secondary) !important;
+  overflow: visible !important;
+}
+
+[class*="iconWrapper-"] button:hover,
+[class*="toolbar-"] button:hover,
+[class*="buttons-"] button:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text-primary) !important;
+  filter: none !important;
 }
 
 /* Keep danger buttons visually distinct */
-[class*="colorRed-"],
-[class*="button-"][class*="colorRed-"] {
+button[class*="colorRed-"] {
   background: var(--danger) !important;
   border-color: transparent !important;
   color: #fff !important;
