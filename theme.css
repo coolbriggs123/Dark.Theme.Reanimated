@@ -23,7 +23,7 @@
 /* =============================================================================
    IMPORTS — load component files in dependency order
    ============================================================================= */
-@import url("variables.css");
+@import url("https://raw.githubusercontent.com/coolbriggs123/Dark.Theme.Reanimated/refs/heads/main/variables.css");
 
 /* =============================================================================
    BASE — root reset, typography, background
