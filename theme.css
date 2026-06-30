@@ -1,0 +1,648 @@
+/* =============================================================================
+   Dark Reanimated v1.0.0
+   A premium monochrome dark theme for Vesktop / Discord
+   Deep blacks, charcoals, grays, no color, no noise
+   ============================================================================= */
+
+/*
+ * Installation Instructions
+ * --------------------------
+ * 1. Open Vesktop and go to Settings → Themes (or Custom CSS).
+ * 2. If using the Themes tab: place this entire folder inside
+ *    %appdata%\vesktop\themes\ and enable "Dark Reanimated" in the list.
+ * 3. If using Quick CSS: paste the contents of theme.css into the Quick CSS box,
+ *    or use @import url("path/to/theme.css") at the top of your Quick CSS.
+ * 4. Reload Discord (Ctrl+R) to apply.
+ *
+ * Optional cursor-light effect requires the companion JS snippet at the
+ * bottom of this file. Paste it into Vesktop's Custom JS / plugin entry point.
+ * The theme degrades gracefully if JS is unavailable — the cursor light is
+ * simply absent; everything else works as normal.
+ */
+
+/* =============================================================================
+   IMPORTS — load component files in dependency order
+   ============================================================================= */
+@import url("variables.css");
+
+/* =============================================================================
+   BASE — root reset, typography, background
+   ============================================================================= */
+html,
+body,
+#app-mount {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Kill Discord's default blurple backgrounds on primary containers */
+[class*="app-"] > [class*="base-"],
+[class*="bg-"] {
+  background-color: var(--bg-primary) !important;
+}
+
+/* =============================================================================
+   GLOBAL TRANSITIONS — smooth everything, GPU-safe properties only
+   ============================================================================= */
+@media (prefers-reduced-motion: no-preference) {
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color var(--transition-fast),
+      color            var(--transition-fast),
+      border-color     var(--transition-fast),
+      opacity          var(--transition-fast),
+      box-shadow       var(--transition-medium),
+      filter           var(--transition-medium),
+      transform        var(--transition-medium);
+  }
+}
+
+/* =============================================================================
+   SCROLLBARS
+   ============================================================================= */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+/* =============================================================================
+   AMBIENT EDGE GLOW — barely there, 45-second organic pulse
+   ============================================================================= */
+@keyframes edge-pulse {
+  0%,
+  100% { opacity: 0.03; filter: blur(18px); }
+  30%  { opacity: 0.07; filter: blur(22px); }
+  60%  { opacity: 0.05; filter: blur(16px); }
+}
+
+#app-mount::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-large);
+  box-shadow:
+    inset 0 0 60px rgba(255, 255, 255, 0.04),
+    0 0 60px rgba(255, 255, 255, 0.04);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #app-mount::before {
+    animation: edge-pulse 45s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app-mount::before {
+    animation-play-state: paused;
+  }
+}
+
+/* =============================================================================
+   CURSOR LIGHT — CSS layer (position updated by companion JS)
+   ============================================================================= */
+#cursor-light {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 800px;
+  margin-left: -400px;
+  margin-top: -400px;
+  pointer-events: none;
+  z-index: 9999;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.045) 0%,
+    rgba(255, 255, 255, 0.015) 30%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  filter: blur(80px);
+  will-change: transform, opacity;
+  transform: translate(0px, 0px);
+  transition: transform 80ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #cursor-light {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   GUILD / SERVER SIDEBAR
+   ============================================================================= */
+nav[class*="guilds-"],
+[class*="guilds-"] > [class*="scroller-"] {
+  background-color: var(--bg-secondary) !important;
+  border-right: 1px solid var(--border);
+}
+
+/* Server icon hover — spring bounce */
+[class*="listItem-"] [class*="wrapper-"],
+[class*="blobContainer-"] {
+  transition: transform var(--transition-bounce), box-shadow var(--transition-bounce) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="listItem-"]:hover [class*="wrapper-"],
+  [class*="listItem-"]:hover [class*="blobContainer-"] {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* =============================================================================
+   CHANNEL LIST
+   ============================================================================= */
+[class*="sidebar-"],
+[class*="sidebarRegion-"] {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Channel item */
+[class*="containerDefault-"],
+[class*="channel-"] [class*="container-"] {
+  border-radius: var(--radius-small);
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="containerDefault-"]:hover,
+  [class*="channel-"] [class*="container-"]:hover {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    padding-left: calc(8px + 3px);
+  }
+}
+
+[class*="containerDefault-"][class*="modeSelected-"],
+[class*="channel-"] [class*="container-"][class*="selected-"] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+/* Category headers — hide default arrow, show minimal chevron */
+[class*="categoryContainer-"] [class*="icon-"] svg,
+[class*="category-"] > [class*="header-"] [class*="arrow-"] {
+  display: none;
+}
+
+[class*="categoryContainer-"] [class*="icon-"]::after,
+[class*="category-"] > [class*="header-"]::before {
+  content: "›";
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+/* =============================================================================
+   CHAT / MESSAGE AREA
+   ============================================================================= */
+[class*="chat-"],
+[class*="content-"] [class*="scrollerInner-"] {
+  background-color: var(--bg-primary) !important;
+}
+
+/* Individual message rows */
+[class*="message-"],
+[class*="messageListItem-"] {
+  background: transparent !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="message-"]:hover,
+  [class*="messageListItem-"]:hover {
+    background: rgba(255, 255, 255, 0.02) !important;
+  }
+}
+
+/* Message text */
+[class*="messageContent-"] {
+  color: var(--text-primary);
+}
+
+/* Timestamps */
+[class*="timestamp-"],
+time[class*="timestamp-"] {
+  color: var(--text-muted) !important;
+}
+
+/* Code blocks */
+code,
+pre,
+[class*="markup-"] code,
+[class*="codeContainer-"] {
+  background: var(--bg-secondary) !important;
+  font-family: 'Fira Code', 'Consolas', 'Courier New', monospace;
+  border-radius: var(--radius-medium) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Embeds / media */
+[class*="embed-"],
+[class*="imageWrapper-"],
+[class*="attachmentContainer-"] {
+  border-radius: var(--radius-medium) !important;
+  overflow: hidden;
+}
+
+/* Reaction chips */
+[class*="reaction-"] {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: var(--radius-small) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="reaction-"]:hover {
+    transform: scale(1.07);
+    border-color: rgba(255, 255, 255, 0.18) !important;
+  }
+}
+
+/* =============================================================================
+   MESSAGE INPUT
+   ============================================================================= */
+[class*="channelTextArea-"],
+[class*="textArea-"],
+[class*="slateContainer-"] {
+  background: var(--surface) !important;
+  border-radius: var(--radius-medium) !important;
+  border: 1px solid transparent !important;
+  color: var(--text-primary) !important;
+}
+
+[class*="channelTextArea-"]:focus-within,
+[class*="textArea-"]:focus-within {
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset !important;
+}
+
+/* Toolbar inside input */
+[class*="toolbar-"],
+[class*="buttons-"] {
+  background: transparent !important;
+}
+
+/* =============================================================================
+   INPUTS & FORMS (generic)
+   ============================================================================= */
+input,
+textarea,
+[class*="input-"],
+[class*="inputDefault-"] {
+  background: var(--surface) !important;
+  border-radius: var(--radius-small) !important;
+  border: 1px solid transparent !important;
+  color: var(--text-primary) !important;
+}
+
+input:focus,
+textarea:focus,
+[class*="input-"]:focus,
+[class*="inputDefault-"]:focus,
+[class*="inputWrapper-"]:focus-within [class*="input-"] {
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset !important;
+}
+
+/* Search bar */
+[class*="searchBar-"] {
+  background: var(--surface) !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-small) !important;
+}
+
+[class*="searchBar-"]:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[class*="searchBar-"]:focus-within {
+  border-color: var(--border-focus) !important;
+}
+
+/* =============================================================================
+   MEMBERS LIST
+   ============================================================================= */
+[class*="membersWrap-"],
+[class*="members-"] {
+  background-color: var(--bg-secondary) !important;
+}
+
+[class*="member-"] [class*="container-"] {
+  border-radius: var(--radius-small);
+}
+
+[class*="member-"] [class*="container-"]:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Status indicators — grayscale */
+[class*="status-"][class*="online-"],
+rect[class*="pointerEvents-"] {
+  fill: var(--text-primary) !important;
+}
+
+[class*="status-"][class*="offline-"],
+[class*="status-"][class*="invisible-"] {
+  fill: var(--text-muted) !important;
+}
+
+/* =============================================================================
+   USER PANEL (bottom left)
+   ============================================================================= */
+[class*="panels-"],
+[class*="accountProfileWrapper-"],
+[class*="account-"] {
+  background-color: var(--bg-primary) !important;
+  border-top: 1px solid var(--border);
+}
+
+/* =============================================================================
+   MODALS
+   ============================================================================= */
+[class*="modal-"] [class*="root-"],
+[class*="layer-"] [class*="root-"] {
+  background: var(--glass) !important;
+  -webkit-backdrop-filter: blur(calc(var(--blur) * 1.2));
+  backdrop-filter: blur(calc(var(--blur) * 1.2));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large) !important;
+  box-shadow: var(--shadow-float);
+  color: var(--text-primary);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  [class*="modal-"] [class*="root-"],
+  [class*="layer-"] [class*="root-"] {
+    background: var(--bg-secondary) !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="modal-"] [class*="root-"] {
+    animation: modal-in 200ms ease forwards;
+  }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================================================
+   CONTEXT MENUS
+   ============================================================================= */
+[class*="menu-"],
+[class*="contextMenu-"] {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-medium) !important;
+  box-shadow: var(--shadow-float) !important;
+  color: var(--text-primary) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [class*="menu-"],
+  [class*="contextMenu-"] {
+    animation: menu-in 150ms ease forwards;
+  }
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+[class*="item-"][class*="labelContainer-"],
+[class*="menuItem-"] {
+  border-radius: calc(var(--radius-small) - 2px) !important;
+  color: var(--text-primary) !important;
+}
+
+[class*="item-"]:hover [class*="labelContainer-"],
+[class*="menuItem-"]:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Destructive items — only permitted non-grayscale */
+[class*="item-"][class*="danger-"],
+[class*="menuItem-"][class*="danger-"] {
+  color: var(--danger) !important;
+}
+
+/* =============================================================================
+   TOOLTIPS
+   ============================================================================= */
+[class*="tooltip-"] {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+[class*="tooltipPointer-"] {
+  border-color: var(--surface) transparent transparent transparent !important;
+}
+
+/* =============================================================================
+   SETTINGS PANEL
+   ============================================================================= */
+[class*="standardSidebarView-"],
+[class*="contentRegion-"] {
+  background: var(--bg-primary) !important;
+}
+
+[class*="sidebar-"][class*="settingsSidebar-"],
+[class*="sidebar-"] [class*="scroller-"] {
+  background: var(--bg-secondary) !important;
+}
+
+/* Settings cards / sections */
+[class*="card-"],
+[class*="cardPrimary-"],
+[class*="formItem-"] {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-medium) !important;
+}
+
+/* Settings nav items */
+[class*="item-"][class*="themed-"],
+[class*="settingsMenuItem-"] {
+  border-radius: var(--radius-small) !important;
+  color: var(--text-secondary) !important;
+}
+
+[class*="item-"][class*="themed-"]:hover,
+[class*="settingsMenuItem-"]:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary) !important;
+}
+
+[class*="item-"][class*="themed-"][class*="selected-"],
+[class*="settingsMenuItem-"][class*="selected-"],
+[class*="item-"][class*="themed-"][class*="active-"] {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+/* =============================================================================
+   TITLE BAR
+   ============================================================================= */
+[class*="titleBar-"],
+[class*="typeWindows-"] [class*="titleBar-"] {
+  background: var(--bg-primary) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border);
+}
+
+[class*="wordmark-"],
+[class*="titleBar-"] [class*="title-"] {
+  color: var(--text-secondary) !important;
+}
+
+/* Window controls */
+[class*="winButton-"] {
+  color: var(--text-secondary) !important;
+}
+
+[class*="winButton-"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Close button — danger distinction */
+[class*="winButton-"][class*="winButtonClose-"]:hover {
+  background: rgba(192, 57, 43, 0.75) !important;
+}
+
+/* =============================================================================
+   PANELS — glassmorphism surfaces
+   ============================================================================= */
+[class*="sidebar-"],
+[class*="chatContent-"],
+[class*="membersWrap-"],
+[class*="standardSidebarView-"] {
+  -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
+  box-shadow: var(--shadow);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  [class*="sidebar-"],
+  [class*="chatContent-"],
+  [class*="membersWrap-"],
+  [class*="standardSidebarView-"] {
+    background: var(--bg-secondary) !important;
+  }
+}
+
+/* =============================================================================
+   BUTTONS
+   ============================================================================= */
+[class*="button-"],
+button[class*="filled-"],
+button[class*="outlined-"] {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-small) !important;
+  color: var(--text-primary) !important;
+}
+
+[class*="button-"]:hover,
+button[class*="filled-"]:hover {
+  filter: brightness(1.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[class*="button-"]:active {
+  filter: brightness(0.94) !important;
+  transform: scale(0.98);
+}
+
+/* Keep danger buttons visually distinct */
+[class*="colorRed-"],
+[class*="button-"][class*="colorRed-"] {
+  background: var(--danger) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+/* =============================================================================
+   FOCUS RING — accessibility
+   ============================================================================= */
+:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4) !important;
+}
+
+/* =============================================================================
+   REDUCED MOTION — disable all transforms, keep colors
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: background-color var(--transition-fast),
+                color            var(--transition-fast),
+                border-color     var(--transition-fast),
+                opacity          var(--transition-fast) !important;
+    transform: none !important;
+  }
+}
+
+/* =============================================================================
+   OPTIONAL COMPANION JS — Cursor Light
+   Copy the block below into Vesktop's Custom JS / plugin entry point.
+   Remove if you don't want the cursor light effect.
+
+   (function () {
+     const el = document.createElement('div');
+     el.id = 'cursor-light';
+     document.body.appendChild(el);
+
+     let tx = 0, ty = 0, cx = 0, cy = 0;
+     const lerp = (a, b, t) => a + (b - a) * t;
+
+     function tick() {
+       cx = lerp(cx, tx, 0.12);
+       cy = lerp(cy, ty, 0.12);
+       el.style.transform = `translate(${cx}px, ${cy}px)`;
+       requestAnimationFrame(tick);
+     }
+
+     document.addEventListener('mousemove', e => {
+       tx = e.clientX;
+       ty = e.clientY;
+     });
+
+     tick();
+   })();
+
+   ============================================================================= */
